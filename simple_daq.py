@@ -1,79 +1,129 @@
-from time import sleep
+"""
+Simple DAQ Controller
+=====================
 
-import pint
-import numpy as np
+Python For The Lab revolves around controlling a simple DAQ device built on top of an Arduino.
+The DAQ device is capable of generating up to two analog outputs in the range 0-3.3V and to acquire
+several analog inputs.
+
+Because of the pedagogy of the course Python for the Lab, it was assumed that the device can generate
+value by value and not a sequence. This forces the developer to think on how to implement a solution
+purely on Python.
+"""
+
 import serial
+from time import sleep, time
 
 
-ur = pint.UnitRegistry()
+class SimpleDaq():
+    """ Controller for the serial devices that ships with Python for the Lab.
+    """
+    DEFAULTS = {'write_termination': '\n',
+                'read_termination': '\n',
+                'encoding': 'ascii',
+                'baudrate': 9600,
+                'write_timeout': 1,
+                'read_timeout': 1,
+                }
+    """Dictionary storing the defaults to communicate through the serial port.
+    """
+    rsc = None
+    """Resource. It is the actual library providing low level communication. """
 
-class Device:
     def __init__(self, port):
-        self.rsc = serial.Serial(port)
-        self.port = port
+        """ Automatically initializes the communication with the device.
+        """
+        self.initialize(port)
+
+    def initialize(self, port):
+        """ Opens the serial port with the DEFAULTS.
+        """
+        self.rsc = serial.Serial(port=port,
+                                 baudrate=self.DEFAULTS['baudrate'],
+                                 timeout=self.DEFAULTS['read_timeout'],
+                                 write_timeout=self.DEFAULTS['write_timeout'])
         sleep(0.5)
-        self.write_termination = '\n'
-        self.read_termination = '\r\n'
-        self.delay_write_read = 0.2  # Delay between writing and reading, in seconds
-        self.encoding = 'ascii'
 
     def idn(self):
-        return self.query('IDN')
+        """Identify the device.
+        """
+        return self.query("IDN")
 
-    def read_analog_value(self, channel):
-        command = 'IN:CH{}'.format(channel)
-        answer = self.query(command)
-        value_bits = int(answer)
-        value_volts = value_bits * 3.3/4095
-        return value_volts * ur('V')
+    def get_analog_value(self, channel):
+        """Gets the value from an analog port.
+
+        :param int port: Port number to read.
+        :return int: The value read.
+        """
+        query_string = 'IN:CH{}'.format(channel)
+        value = int(self.query(query_string))
+        return value
 
     def set_analog_value(self, channel, value):
-        command = 'OUT:CH{}:{}'.format(channel, value)
-        self.write(command)
-        sleep(0.1)
+        """ Sets a voltage to an output port.
+
+        :param int port: Port number. Range depends on device
+        :param Quantity value: The output value in Volts.
+        """
+        value = int(value.m_as('V')/3.3*4095)
+        write_string = 'OUT:CH{}:{}'.format(channel, value)
+        self.write(write_string)
 
     def finalize(self):
-        self.rsc.close()
-
-    def write(self, command):
-        command = command + self.write_termination
-        self.rsc.write(command.encode(self.encoding))
-
-    def query(self, command):
-        self.write(command)
-        sleep(self.delay_write_read)
-        answer = self.rsc.readline()
-        without_encoding = answer.decode(self.encoding)
-        without_read_termination = without_encoding.strip(self.read_termination)
-        return without_read_termination
-
-
-    def scan_voltage(self, channel_out, channel_in, start_V, stop_V, step):
+        """ Closes the communication with the device.
         """
+        if self.rsc is not None:
+            self.rsc.close()
+
+    def query(self, message):
+        """Sends a message to the devices an reads the output.
+
+        :param str message: Message sent to the device. It should generate an output, or it will timeout waiting to read from it.
+        :return str: The message read from the device
         """
-        start_V = start_V.m_as('V')
-        stop_V = stop_V.m_as('V')
-        step = step.m_as('V')
+        self.write(message)
+        return self.read()
 
-        voltages = np.arange(start_V, stop_V, step)
-        self.measured_voltages = []
+    def write(self, message):
+        """ Writes a message to the device using the DEFAULT end of line and encoding.
 
-        for voltage in voltages:
-            value = int(voltage/3.3*4095)
-            self.set_analog_value(channel_out, value)
-            self.measured_voltages.append(self.read_analog_value(channel_in))
+        :param str message: The message to send to the device
+        """
+        if self.rsc is None:
+            raise Warning("Trying to write to device before initializing")
 
+        msg = (message + self.DEFAULTS['write_termination']).encode(self.DEFAULTS['encoding'])
+        self.rsc.write(msg)
+        sleep(0.1)
 
-    def __str__(self):
-        return 'DAQ Device on port {}'.format(self.port)
+    def read(self):
+        """ Reads from the device using the DEFAUTLS end of line and encoding.
 
+        :return str: The message received from the device.
+        """
+        line = "".encode(self.DEFAULTS['encoding'])
+        read_termination = self.DEFAULTS['read_termination'].encode(self.DEFAULTS['encoding'])
 
-dev = Device('/dev/ttyACM0')
+        t0 = time()
+        new_char = "".encode(self.DEFAULTS['encoding'])
+        while new_char != read_termination:
+            new_char = self.rsc.read(size=1)
+            line += new_char
+            if time()-t0 > self.DEFAULTS['read_timeout']:
+                raise Exception("Readout time reached when reading from the device")
 
-start = 2500 * ur('mV')
-stop = 3.29 * ur('V')
-step = 100 * ur('mV')
+        return line.decode(self.DEFAULTS['encoding'])
 
-dev.scan_voltage(0, 0, start, stop, step)
-print(dev.measured_voltages)
-dev.finalize()
+if __name__ == "__main__":
+    import pint
+    ur = pint.UnitRegistry()
+
+    d = SimpleDaq('/dev/ttyACM0')
+    # input('Waiting to ready')
+    print(d.query('IDN'))
+    #d.write('OUT:CH0:4000')
+    input('Press to read value')
+    print(d.query('IN:CH0'))
+    out_value = ur('3.0V')
+    d.set_analog_value(0, out_value)
+    d.finalize()
