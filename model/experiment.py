@@ -12,7 +12,7 @@ class Experiment:
         self.daq = DAQ(self.config['daq']['port'], self.config['daq']['resistance'])
 
     def do_scan(self):
-        pass
+        return self.daq.read_current(0)
 
     def save_data(self):
         pass
