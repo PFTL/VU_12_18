@@ -19,5 +19,11 @@ class DAQ:
         return current
 
     def set_analog_value(self, channel, value):
+        """ value should be in volts.
+        """
+        value = int(value/3.3*4095)
+        if value > 4095:
+            raise Exception('Value out of range')
+
         self.driver.set_analog_value(channel, value)
 

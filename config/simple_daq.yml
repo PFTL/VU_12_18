@@ -5,6 +5,8 @@ user:
 daq:
   port: '/dev/ttyACM0'
   resistance: 220ohm
+  minimum_out: 0V
+  maximum_out: 3.3V
 
 scan:
   start: 0V
