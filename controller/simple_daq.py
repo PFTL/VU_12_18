@@ -53,15 +53,6 @@ class SimpleDaq:
         sleep(0.1)
 
     def read(self):
-        line = "".encode(self.DEFAULTS['encoding'])
-        read_termination = self.DEFAULTS['read_termination'].encode(self.DEFAULTS['encoding'])
-
-        t0 = time()
-        new_char = "".encode(self.DEFAULTS['encoding'])
-        while new_char != read_termination:
-            new_char = self.rsc.read(size=1)
-            line += new_char
-            if time()-t0 > self.DEFAULTS['read_timeout']:
-                raise Exception("Readout time reached when reading from the device")
-
-        return line.decode(self.DEFAULTS['encoding'])
+        line = self.rsc.readline()
+        line = line.decode(self.DEFAULTS['encoding'])
+        return line.strip(self.DEFAULTS['read_termination'])
