@@ -1,3 +1,4 @@
+import os
 from time import sleep
 
 import numpy as np
@@ -38,10 +39,35 @@ class Experiment:
         return self.currents
 
     def save_scan_data(self, file_path=None):
-        pass
+        file_path = os.path.join(self.config['saving']['directory'], self.config['saving']['filename'])
+
+        if not os.path.isdir(self.config['saving']['directory']):
+            os.makedirs(self.config['saving']['directory'])
+
+        i = 0
+        base_filename, ext = os.path.splitext(file_path)
+        while os.path.isfile(file_path):
+            i += 1
+            filename = base_filename + str(i)
+            file_path = filename + ext
+
+        with open(file_path, 'w') as f:
+            header = "# Data saved from Python For The Lab by {}\n".format(self.config['user']['name'])
+            f.write(header)
+            description = "# Current (mA), Voltages (V)\n"
+            f.write(description)
+            for i in range(len(self.currents)):
+                f.write("{}, {}\n".format(self.currents[i], self.voltages[i]))
+
 
     def save_scan_metadata(self):
         pass
 
     def finalize(self):
         pass
+
+if __name__ == '__main__':
+    exp = Experiment()
+    conf = '../config/simple_daq.yml'
+    exp.load_config(conf)
+    exp.save_scan_data()
