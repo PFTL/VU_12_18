@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1480</width>
-    <height>1167</height>
+    <width>933</width>
+    <height>367</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -169,8 +169,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1480</width>
-     <height>39</height>
+     <width>933</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -178,6 +178,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="action_Save"/>
+    <addaction name="actionOpen_File"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -188,6 +189,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionOpen_File">
+   <property name="text">
+    <string>Open File</string>
    </property>
   </action>
  </widget>
