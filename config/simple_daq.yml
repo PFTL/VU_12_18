@@ -3,6 +3,7 @@ user:
   last_name: Carattino
 
 daq:
+  type: RealDAQ # DummyDAQ # Or
   port: '/dev/ttyACM0'
   resistance: 220ohm
   minimum_out: 0V
@@ -18,5 +19,5 @@ scan:
 
 saving:
   filename: 'IV_Curve.dat'
-  directory: '/home/aquiles/Data'
+  directory: '/home/aquiles/Data/IV_Curve'
 

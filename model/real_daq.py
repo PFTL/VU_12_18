@@ -23,3 +23,7 @@ class DAQ:
 
         self.driver.set_analog_value(channel, value)
 
+    def finalize(self):
+        for i in range(2):
+            self.set_analog_value(i, 0)
+

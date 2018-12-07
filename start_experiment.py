@@ -17,5 +17,3 @@ app = QApplication([])
 mw = MainWindow(exp)
 mw.show()
 app.exec_()
-
-exp.finalize()

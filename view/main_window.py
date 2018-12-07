@@ -8,7 +8,7 @@ from model import ur
 import pyqtgraph as pg
 
 from view.general_worker import WorkerThread
-
+from view.progress import Progress
 
 class MainWindow(QMainWindow):
     def __init__(self, experiment):
@@ -25,6 +25,12 @@ class MainWindow(QMainWindow):
         self.stop_button.clicked.connect(self.stop_clicked)
         self.experiment = experiment
 
+        self.plot_widget = pg.PlotWidget(self)
+        self.progress_widget = Progress()
+        layout = self.centralwidget.layout()
+        layout.addWidget(self.plot_widget)
+        layout.addWidget(self.progress_widget)
+
         self.out_start_line.setText(self.experiment.config['scan']['start'])
         self.out_stop_line.setText(self.experiment.config['scan']['stop'])
         self.out_step_line.setText(self.experiment.config['scan']['step'])
@@ -32,13 +38,10 @@ class MainWindow(QMainWindow):
         self.out_channel_line.setText(str(self.experiment.config['scan']['channel_out']))
         self.in_channel_line.setText(str(self.experiment.config['scan']['channel_in']))
 
-        self.plot_widget = pg.PlotWidget(self)
-        layout = self.centralwidget.layout()
-        layout.addWidget(self.plot_widget)
-
         self.worker_thread = WorkerThread(self.experiment.do_scan)
         self.action_Save.triggered.connect(self.experiment.save_scan_data)
         self.actionOpen_File.triggered.connect(self.load_data)
+        self.progress_widget.scan_progress_bar.setValue(0)
 
     def start_clicked(self):
         if self.experiment.scan_running:
@@ -65,9 +68,9 @@ class MainWindow(QMainWindow):
         self.plot_widget.plot(data[:,1], data[:,0], clear=True)
 
 
-
     def stop_clicked(self):
         self.experiment.stop_scan = True
+
 
     def update_plot(self):
         x_data = self.experiment.voltages
@@ -75,6 +78,9 @@ class MainWindow(QMainWindow):
 
         self.plot_widget.plot(x_data, y_data, clear=True)
 
+        # self.progress_widget.set_voltage_line.setText("{:~3.3f}".format(self.experiment.current_voltage))
+        # self.progress_widget.update_progress_bar(self.experiment.scan_progress)
+        self.progress_widget.update_voltage(self.experiment.current_voltage)
         if not self.experiment.scan_running:
             self.refresh_timer.stop()
             self.start_button.setEnabled(True)
