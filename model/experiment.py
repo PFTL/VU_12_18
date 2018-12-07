@@ -22,7 +22,7 @@ class Experiment:
         stop = stop.m_as('V')
         step = ur(self.config['scan']['step'])
         step = step.m_as('V')
-
+        delay = ur(self.config['scan']['delay'])
         self.voltages = np.arange(start, stop+step, step)
         self.currents = np.zeros(self.voltages.shape[0])
         self.stop_scan = False
@@ -30,7 +30,7 @@ class Experiment:
         for voltage in self.voltages:
             self.daq.set_analog_value(self.config['scan']['channel_out'], voltage)
             self.currents[i] = self.daq.read_current(self.config['scan']['channel_in']).m_as('mA')
-            sleep(self.config['scan']['delay'].m_as('s'))
+            sleep(delay.m_as('s'))
             i += 1
             if self.stop_scan:
                 break
