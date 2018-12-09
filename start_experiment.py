@@ -1,11 +1,8 @@
-from time import sleep
 import sys
 import os
-from model.experiment import Experiment
+from PythonForTheLab.model.experiment import Experiment
 
-import threading
-
-from view.main_window import MainWindow
+from PythonForTheLab.view.main_window import MainWindow
 from PyQt5.QtWidgets import QApplication
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 

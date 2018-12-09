@@ -1,5 +1,5 @@
 import numpy as np
-from model import ur
+from PythonForTheLab.model import ur
 
 
 class DummyDAQ:

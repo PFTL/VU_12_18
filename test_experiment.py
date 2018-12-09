@@ -1,6 +1,6 @@
 import sys
 import os
-from model.experiment import Experiment
+from PythonForTheLab.model.experiment import Experiment
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 

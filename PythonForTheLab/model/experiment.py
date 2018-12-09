@@ -4,9 +4,9 @@ from time import sleep
 import numpy as np
 import yaml
 
-from model.real_daq import DAQ
-from model.dummy_daq import DummyDAQ
-from model import ur
+from PythonForTheLab.model.real_daq import DAQ
+from PythonForTheLab.model.dummy_daq import DummyDAQ
+from PythonForTheLab.model import ur
 
 
 class Experiment:

@@ -1,5 +1,5 @@
-from controller.simple_daq import SimpleDaq
-from model import ur
+from PythonForTheLab.controller.simple_daq import SimpleDaq
+from PythonForTheLab.model import ur
 
 class DAQ:
     def __init__(self, port, resistance):

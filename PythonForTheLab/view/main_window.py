@@ -3,12 +3,12 @@ import numpy as np
 from PyQt5 import uic
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
-from model import ur
 
 import pyqtgraph as pg
 
-from view.general_worker import WorkerThread
-from view.progress import Progress
+from PythonForTheLab.view.general_worker import WorkerThread
+from PythonForTheLab.view.progress import Progress
+
 
 class MainWindow(QMainWindow):
     def __init__(self, experiment):
